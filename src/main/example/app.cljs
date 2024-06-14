@@ -11,9 +11,6 @@
             ["@react-navigation/native-stack" :as rnn-stack]
             [example.devices.ble :as ble]))
 
-(defonce shadow-splash (js/require "../assets/shadow-cljs.png"))
-(defonce cljs-splash (js/require "../assets/cljs.png"))
-
 (defonce Stack (rnn-stack/createNativeStackNavigator))
 
 (defn device-button [device]
@@ -69,20 +66,6 @@
       [button {:on-press (fn []
                            (-> props .-navigation (.navigate "About")))}
        "Tap me, I'll navigate"]]
-     [:> rn/View
-      [:> rn/View {:style {:flex-direction :row
-                           :align-items :center
-                           :margin-bottom 20}}
-       [:> rn/Image {:style {:width  160
-                             :height 160}
-                     :source cljs-splash}]
-       [:> rn/Image {:style {:width  160
-                             :height 160}
-                     :source shadow-splash}]]
-      [:> rn/Text {:style {:font-weight :normal
-                           :font-size   15
-                           :color       :blue}}
-       "Using: shadow-cljs+expo+reagent+re-frame"]]
      [:> StatusBar {:style "auto"}]]))
 
 (defn- about
