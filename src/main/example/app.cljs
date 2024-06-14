@@ -4,16 +4,41 @@
             [example.widgets :refer [button]]
             [expo.root :as expo-root]
             ["expo-status-bar" :refer [StatusBar]]
-            [re-frame.core :as rf]
+            [re-frame.core :as rf :refer [subscribe dispatch dispatch-sync]]
             ["react-native" :as rn]
             [reagent.core :as r]
             ["@react-navigation/native" :as rnn]
-            ["@react-navigation/native-stack" :as rnn-stack]))
+            ["@react-navigation/native-stack" :as rnn-stack]
+            [example.devices.ble :as ble]))
 
 (defonce shadow-splash (js/require "../assets/shadow-cljs.png"))
 (defonce cljs-splash (js/require "../assets/cljs.png"))
 
 (defonce Stack (rnn-stack/createNativeStackNavigator))
+
+(defn device-button [device]
+  [:> rn/TouchableHighlight
+   {:style {:background-color "#4a4" :border-radius 5 :padding 10 :margin 5}
+    :on-press (fn []
+                (.log js/console "todo")
+                (dispatch [:set-page :ble-control])
+                (dispatch [:set-current-device device]))}
+   [:> rn/Text {:style {:color "#fff"}}
+    [:> rn/Text (:name device) " " (:id device)]]])
+
+(defn devices-box []
+  (let [devices (subscribe [:get-devices])]
+    (fn []
+      [:> rn/View
+       (if (empty? @devices)
+         [:> rn/Text {:style {:margin 10}}
+          "no device"]
+         [:> rn/FlatList
+          {:data (clj->js @devices)
+           :key-extractor (fn [item index]
+                            (:id (js->clj item :keywordize-keys true)))
+           :render-item #(let [device (:item (js->clj % :keywordize-keys true))]
+                           (r/as-element [device-button device]))}])])))
 
 (defn home [^js props]
   (r/with-let [counter (rf/subscribe [:get-counter])
@@ -23,6 +48,14 @@
                          :justify-content :space-between
                          :align-items :center
                          :background-color :white}}
+     [:> rn/TouchableOpacity {:style {:background-color :green :padding 10}
+                              :on-press (fn []
+                                          (ble/init)
+                                          #_(.alert rn/Alert "call init"))}
+      [:> rn/Text "init"]]
+     [button {:on-press #(ble/scan)}
+      "scan"]
+     [devices-box]
      [:> rn/View {:style {:align-items :center}}
       [:> rn/Text {:style {:font-weight   :bold
                            :font-size     72
@@ -52,7 +85,7 @@
        "Using: shadow-cljs+expo+reagent+re-frame"]]
      [:> StatusBar {:style "auto"}]]))
 
-(defn- about 
+(defn- about
   []
   (r/with-let [counter (rf/subscribe [:get-counter])]
     [:> rn/View {:style {:flex 1
