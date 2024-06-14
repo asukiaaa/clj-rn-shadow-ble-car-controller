@@ -9,21 +9,23 @@
             [reagent.core :as r]
             ["@react-navigation/native" :as rnn]
             ["@react-navigation/native-stack" :as rnn-stack]
-            [example.devices.ble :as ble]))
+            [example.devices.ble :as ble]
+            [example.view.control.index :as view.control]))
 
 (defonce Stack (rnn-stack/createNativeStackNavigator))
 
-(defn device-button [device]
+(defn device-button [{:keys [device navigation]}]
   [:> rn/TouchableHighlight
    {:style {:background-color "#4a4" :border-radius 5 :padding 10 :margin 5}
     :on-press (fn []
                 (.log js/console "todo")
-                (dispatch [:set-page :ble-control])
+                #_(dispatch [:set-page :ble-control])
+                (.navigate navigation "DeviceControl")
                 (dispatch [:set-current-device device]))}
    [:> rn/Text {:style {:color "#fff"}}
     [:> rn/Text (:name device) " " (:id device)]]])
 
-(defn devices-box []
+(defn devices-box [{:keys [navigation]}]
   (let [devices (subscribe [:get-devices])]
     (fn []
       [:> rn/View
@@ -35,38 +37,38 @@
            :key-extractor (fn [item index]
                             (:id (js->clj item :keywordize-keys true)))
            :render-item #(let [device (:item (js->clj % :keywordize-keys true))]
-                           (r/as-element [device-button device]))}])])))
+                           (r/as-element [device-button {:device device :navigation navigation}]))}])])))
 
 (defn home [^js props]
   (r/with-let [counter (rf/subscribe [:get-counter])
                tap-enabled? (rf/subscribe [:counter-tappable?])]
-    [:> rn/View {:style {:flex 1
-                         :padding-vertical 50
-                         :justify-content :space-between
-                         :align-items :center
-                         :background-color :white}}
-     [:> rn/TouchableOpacity {:style {:background-color :green :padding 10}
-                              :on-press (fn []
-                                          (ble/init)
-                                          #_(.alert rn/Alert "call init"))}
-      [:> rn/Text "init"]]
-     [button {:on-press #(ble/scan)}
-      "scan"]
-     [devices-box]
-     [:> rn/View {:style {:align-items :center}}
-      [:> rn/Text {:style {:font-weight   :bold
-                           :font-size     72
-                           :color         :blue
-                           :margin-bottom 20}} @counter]
-      [button {:on-press #(rf/dispatch [:inc-counter])
-               :disabled? (not @tap-enabled?)
-               :style {:background-color :blue}}
-       "Tap me, I'll count"]]
-     [:> rn/View {:style {:align-items :center}}
-      [button {:on-press (fn []
-                           (-> props .-navigation (.navigate "About")))}
-       "Tap me, I'll navigate"]]
-     [:> StatusBar {:style "auto"}]]))
+    (let [navigation (-> props .-navigation)]
+      [:> rn/View {:style {:flex 1
+                           :padding-vertical 50
+                           :justify-content :space-between
+                           :align-items :center
+                           :background-color :white}}
+       [:> rn/TouchableOpacity {:style {:background-color :green :padding 10}
+                                :on-press (fn []
+                                            (ble/init)
+                                            #_(.alert rn/Alert "call init"))}
+        [:> rn/Text "init"]]
+       [button {:on-press #(ble/scan)}
+        "scan"]
+       [devices-box {:navigation navigation}]
+       [:> rn/View {:style {:align-items :center}}
+        [:> rn/Text {:style {:font-weight   :bold
+                             :font-size     72
+                             :color         :blue
+                             :margin-bottom 20}} @counter]
+        [button {:on-press #(rf/dispatch [:inc-counter])
+                 :disabled? (not @tap-enabled?)
+                 :style {:background-color :blue}}
+         "Tap me, I'll count"]]
+       [:> rn/View {:style {:align-items :center}}
+        [button {:on-press #(.navigate navigation "About")}
+         "Tap me, I'll navigate"]]
+       [:> StatusBar {:style "auto"}]])))
 
 (defn- about
   []
@@ -110,7 +112,9 @@
                         :options {:title "Example App"}}]
       [:> Stack.Screen {:name "About"
                         :component (fn [props] (r/as-element [about props]))
-                        :options {:title "About"}}]]]))
+                        :options {:title "About"}}]
+      [:> Stack.Screen {:name "DeviceControl"
+                        :component (fn [props] (r/as-element [view.control/core props]))}]]]))
 
 (defn start
   {:dev/after-load true}
