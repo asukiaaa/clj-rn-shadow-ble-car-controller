@@ -16,15 +16,8 @@
   (dispatch [:add-device (js->clj data :keywordize-keys true)]))
 
 (defn start-ble-manager []
-  (println "start-ble-manager")
-  (.log js/console "hello")
-  (.log js/console rn-ble-manager)
-  #_(println (.start rn-ble-manager))
-  #_(js/alert "start-ble-manager")
-  #_(js/alert (.start rn-ble-manager #_{:showAlert false :allowDuplication false}))
   (-> (.start rn-ble-manager #_{:showAlert false :allowDuplication false})
       (.then (fn []
-               (.log js/console "then")
                (.enableBluetooth rn-ble-manager)
                #_(js/alert "module initialized")))
       (.catch (fn [error] (.log js/console error))))

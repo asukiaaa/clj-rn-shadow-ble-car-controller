@@ -33,7 +33,7 @@
          [:> rn/Text {:style {:margin 10}}
           "no device"]
          [:> rn/FlatList
-          {:data (clj->js @devices)
+          {:data (clj->js (reverse @devices))
            :key-extractor (fn [item index]
                             (:id (js->clj item :keywordize-keys true)))
            :render-item #(let [device (:item (js->clj % :keywordize-keys true))]
@@ -43,58 +43,58 @@
   (r/with-let [counter (rf/subscribe [:get-counter])
                tap-enabled? (rf/subscribe [:counter-tappable?])]
     (let [navigation (-> props .-navigation)]
-      [:> rn/View {:style {:flex 1
-                           :padding-vertical 50
-                           :justify-content :space-between
+      [:> rn/View {:style {;:flex 1
+                           :padding-top 20
+                           ;:justify-content :space-between
                            :align-items :center
                            :background-color :white}}
-       [:> rn/TouchableOpacity {:style {:background-color :green :padding 10}
-                                :on-press (fn []
-                                            (ble/init)
-                                            #_(.alert rn/Alert "call init"))}
-        [:> rn/Text "init"]]
+       #_[:> rn/TouchableOpacity {:style {:background-color :green :padding 10}
+                                  :on-press (fn []
+                                              (ble/init)
+                                              #_(.alert rn/Alert "call init"))}
+          [:> rn/Text "init"]]
        [button {:on-press #(ble/scan)}
         "scan"]
        [devices-box {:navigation navigation}]
-       [:> rn/View {:style {:align-items :center}}
-        [:> rn/Text {:style {:font-weight   :bold
-                             :font-size     72
-                             :color         :blue
-                             :margin-bottom 20}} @counter]
-        [button {:on-press #(rf/dispatch [:inc-counter])
-                 :disabled? (not @tap-enabled?)
-                 :style {:background-color :blue}}
-         "Tap me, I'll count"]]
-       [:> rn/View {:style {:align-items :center}}
-        [button {:on-press #(.navigate navigation "About")}
-         "Tap me, I'll navigate"]]
-       [:> StatusBar {:style "auto"}]])))
+       #_[:> rn/View {:style {:align-items :center}}
+          [:> rn/Text {:style {:font-weight   :bold
+                               :font-size     72
+                               :color         :blue
+                               :margin-bottom 20}} @counter]
+          [button {:on-press #(rf/dispatch [:inc-counter])
+                   :disabled? (not @tap-enabled?)
+                   :style {:background-color :blue}}
+           "Tap me, I'll count"]]
+       #_[:> rn/View {:style {:align-items :center}}
+          [button {:on-press #(.navigate navigation "About")}
+           "Tap me, I'll navigate"]]
+       #_[:> StatusBar {:style "auto"}]])))
 
-(defn- about
-  []
-  (r/with-let [counter (rf/subscribe [:get-counter])]
-    [:> rn/View {:style {:flex 1
-                         :padding-vertical 50
-                         :padding-horizontal 20
-                         :justify-content :space-between
-                         :align-items :flex-start
-                         :background-color :white}}
-     [:> rn/View {:style {:align-items :flex-start}}
-      [:> rn/Text {:style {:font-weight   :bold
-                           :font-size     54
-                           :color         :blue
-                           :margin-bottom 20}}
-       "About Example App"]
-      [:> rn/Text {:style {:font-weight   :bold
-                           :font-size     20
-                           :color         :blue
-                           :margin-bottom 20}}
-       (str "Counter is at: " @counter)]
-      [:> rn/Text {:style {:font-weight :normal
-                           :font-size   15
-                           :color       :blue}}
-       "Built with React Native, Expo, Reagent, re-frame, and React Navigation"]]
-     [:> StatusBar {:style "auto"}]]))
+#_(defn- about
+    []
+    (r/with-let [counter (rf/subscribe [:get-counter])]
+      [:> rn/View {:style {:flex 1
+                           :padding-vertical 50
+                           :padding-horizontal 20
+                           :justify-content :space-between
+                           :align-items :flex-start
+                           :background-color :white}}
+       [:> rn/View {:style {:align-items :flex-start}}
+        [:> rn/Text {:style {:font-weight   :bold
+                             :font-size     54
+                             :color         :blue
+                             :margin-bottom 20}}
+         "About Example App"]
+        [:> rn/Text {:style {:font-weight   :bold
+                             :font-size     20
+                             :color         :blue
+                             :margin-bottom 20}}
+         (str "Counter is at: " @counter)]
+        [:> rn/Text {:style {:font-weight :normal
+                             :font-size   15
+                             :color       :blue}}
+         "Built with React Native, Expo, Reagent, re-frame, and React Navigation"]]
+       [:> StatusBar {:style "auto"}]]))
 
 (defn root []
   ;; The save and restore of the navigation root state is for development time bliss
@@ -104,15 +104,16 @@
                add-listener! (fn [^js navigation-ref]
                                (when navigation-ref
                                  (.addListener navigation-ref "state" save-root-state!)))]
+    (ble/init)
     [:> rnn/NavigationContainer {:ref add-listener!
                                  :initialState (when @!root-state (-> @!root-state .-data .-state))}
      [:> Stack.Navigator
       [:> Stack.Screen {:name "Home"
                         :component (fn [props] (r/as-element [home props]))
                         :options {:title "Example App"}}]
-      [:> Stack.Screen {:name "About"
-                        :component (fn [props] (r/as-element [about props]))
-                        :options {:title "About"}}]
+      #_[:> Stack.Screen {:name "About"
+                          :component (fn [props] (r/as-element [about props]))
+                          :options {:title "About"}}]
       [:> Stack.Screen {:name "DeviceControl"
                         :component (fn [props] (r/as-element [view.control/core props]))}]]]))
 
