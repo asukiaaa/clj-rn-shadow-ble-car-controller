@@ -1,5 +1,6 @@
 (ns example.widgets
-  (:require ["react-native" :as rn]))
+  (:require ["react-native" :as rn]
+            [example.view.util :as util]))
 
 
 (defn button [{:keys [style text-style on-press
@@ -8,7 +9,7 @@
   [:> rn/Pressable {:style (cond-> {:font-weight      :bold
                                     :font-size        18
                                     :padding          6
-                                    :background-color :blue
+                                    :background-color util/color-green
                                     :border-radius    999
                                     :margin-bottom    20}
                              :always (merge style)
