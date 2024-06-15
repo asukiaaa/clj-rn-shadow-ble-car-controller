@@ -10,7 +10,7 @@
 (defn- control-button [label speed]
   (let [set-and-send-speed (fn [speed]
                              (set-speed speed)
-                             (v.ble-common/send-speed))]
+                             #_(v.ble-common/send-speed))]
     [:> rn/View
      {:style {:background-color "#494" :width 100 :height 100 :margin 5 :border-radius 5}
       :justify-content "center"
