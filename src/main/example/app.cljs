@@ -110,7 +110,7 @@
      [:> Stack.Navigator
       [:> Stack.Screen {:name "Home"
                         :component (fn [props] (r/as-element [home props]))
-                        :options {:title "Example App"}}]
+                        :options {:title "BLE car con"}}]
       #_[:> Stack.Screen {:name "About"
                           :component (fn [props] (r/as-element [about props]))
                           :options {:title "About"}}]
