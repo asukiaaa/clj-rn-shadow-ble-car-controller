@@ -2,8 +2,8 @@
   "scripts": {
     "server": "npx shadow-cljs server",
     "start": "expo start --dev-client",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "android": "npx expo run:android",
+    "ios": "npx expo run:ios",
     "web": "npx expo start --web",
     "web-only": "npx expo start --web-only",
     "release": "npx shadow-cljs release app",
@@ -16,7 +16,6 @@
     "@react-navigation/native-stack": "^6.9.12",
     "create-react-class": "^15.7.0",
     "expo": "~48.0.21",
-    "expo-cli": "^6.3.8",
     "expo-splash-screen": "~0.18.2",
     "expo-status-bar": "^1.4.4",
     "moment": "^2.30.1",

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "BLE car con",
-    "slug": "reagent-expo",
+    "slug": "BleCarCon",
     "privacy": "public",
     "platforms": [
       "ios",
@@ -27,6 +27,7 @@
       "bundleIdentifier": "com.asukiaaa.bleCarController"
     },
     "android": {
+      "versionCode": 2,
       "package": "com.asukiaaa.bleCarController",
       "permissions": [
         "android.permission.BLUETOOTH",
@@ -48,6 +49,11 @@
           "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9c9b217e-2be9-43ce-b788-8511f06f0abf"
+      }
+    }
   }
 }
