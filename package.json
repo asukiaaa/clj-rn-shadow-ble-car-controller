@@ -33,6 +33,6 @@
     "shadow-cljs": "^2.23.3"
   },
   "private": true,
-  "name": "clj-rn-shadow-esp32-car",
+  "name": "clj-rn-shadow-ble-car-controller",
   "version": "1.0.0"
 }
