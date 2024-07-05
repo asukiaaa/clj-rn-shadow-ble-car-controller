@@ -10,7 +10,8 @@
             ["@react-navigation/native" :as rnn]
             ["@react-navigation/native-stack" :as rnn-stack]
             [example.devices.ble :as ble]
-            [example.view.control.index :as view.control]))
+            [example.view.control.index :as view.control]
+            ["react-native-device-info" :as device-info]))
 
 (defonce Stack (rnn-stack/createNativeStackNavigator))
 
@@ -43,29 +44,18 @@
   (r/with-let [counter (rf/subscribe [:get-counter])
                tap-enabled? (rf/subscribe [:counter-tappable?])]
     (let [navigation (-> props .-navigation)]
-      [:> rn/View {:style {;:flex 1
-                           :padding-top 20
-                           ;:justify-content :space-between
-                           :align-items :center
-                           :background-color :white}}
-       [button {:on-press (fn []
-                            (ble/init)
-                            (ble/scan))}
-        "scan"]
-       [devices-box {:navigation navigation}]
-       #_[:> rn/View {:style {:align-items :center}}
-          [:> rn/Text {:style {:font-weight   :bold
-                               :font-size     72
-                               :color         :blue
-                               :margin-bottom 20}} @counter]
-          [button {:on-press #(rf/dispatch [:inc-counter])
-                   :disabled? (not @tap-enabled?)
-                   :style {:background-color :blue}}
-           "Tap me, I'll count"]]
-       #_[:> rn/View {:style {:align-items :center}}
-          [button {:on-press #(.navigate navigation "About")}
-           "Tap me, I'll navigate"]]
-       #_[:> StatusBar {:style "auto"}]])))
+      [:> rn/View {:style {:background-color :white}}
+       [:> rn/View {:style {:justify-content "space-between"}}
+        [:> rn/Text {:style {:align-self "flex-end"}} "version " (.getVersion device-info)]]
+       [:> rn/View {:style {;:flex 1
+                            :padding-top 20
+                                  ;:justify-content :space-between
+                            :align-items :center}}
+        [button {:on-press (fn []
+                             (ble/init)
+                             (ble/scan))}
+         "scan"]
+        [devices-box {:navigation navigation}]]])))
 
 #_(defn- about
     []
