@@ -37,10 +37,12 @@
 (defn send-speed []
   (let [speed (subscribe [:speed])
         sent-speed (subscribe [:sent-speed])
-        now-500ms (.subtract (moment) 500 "ms")]
+        now-50ms (.subtract (moment) 50 "ms")]
+    #_(.log js/console "send")
     (when (or (not (same-speed? @speed @sent-speed))
               (and (not (stop-speed? @speed))
-                   (.isAfter now-500ms (moment (:sent_at @sent-speed)))))
+                   (.isAfter now-50ms (moment (:sent_at @sent-speed)))))
+      #_(println "send" sent-speed)
       (ble-send @speed)
       (dispatch [:set-sent-speed (assoc @speed :sent_at (js/Date.))]))))
 

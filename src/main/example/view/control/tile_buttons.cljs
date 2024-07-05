@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             ["react-native" :as rn]
             [example.view.control.common :as v.ble-common]
-            [re-frame.core :refer [dispatch]]))
+            [re-frame.core :refer [dispatch]]
+            ["react" :as react]))
 
 (defn- set-speed [speed]
   (dispatch [:set-speed (merge {:l 128 :r 128} speed)]))
@@ -10,7 +11,7 @@
 (defn- control-button [label speed]
   (let [set-and-send-speed (fn [speed]
                              (set-speed speed)
-                             #_(v.ble-common/send-speed))]
+                             (v.ble-common/send-speed))]
     [:> rn/View
      {:style {:background-color "#494" :width 100 :height 100 :margin 5 :border-radius 5}
       :justify-content "center"
@@ -23,24 +24,26 @@
 
 (defn core []
   (let [interval (r/atom nil)
-        js-set-interval #(js/setInterval v.ble-common/send-speed 50)
-        set-interval #(reset! interval js-set-interval)
+        set-interval #(reset! interval (js/setInterval v.ble-common/send-speed 50))
         clear-interval #(js/clearInterval @interval)]
-    (r/create-class
-     {:reagent-render
-      (fn []
-        [:> rn/View {:style {:align-content "center" :align-self "center"}}
-         [:> rn/View {:style {:flex-direction "row"}}
-          [control-button "left foreward" {:r 255}]
-          [control-button "forward"       {:l 255 :r 255}]
-          [control-button "right-forward" {:l 255}]]
-         [:> rn/View {:style {:flex-direction "row"}}
-          [control-button "turn left"     {:l 0 :r 255}]
-          [:> rn/View {:style {:width 100 :height 100 :margin 5}}]
-          [control-button "trun right"    {:l 255 :r 0}]]
-         [:> rn/View {:style {:flex-direction "row"}}
-          [control-button "back left"     {:r 0}]
-          [control-button "back"          {:l 0 :r 0}]
-          [control-button "back right"    {:l 0}]]])
-      :component-did-mount set-interval
-      :component-will-unmount clear-interval})))
+    (react/useEffect
+     (fn []
+       (.log js/console "set interval")
+       (set-interval)
+       (fn []
+         (.log js/console "clear interval")
+         (clear-interval)))
+     #js [])
+    [:> rn/View {:style {:align-content "center" :align-self "center"}}
+     [:> rn/View {:style {:flex-direction "row"}}
+      [control-button "left foreward" {:r 255}]
+      [control-button "forward"       {:l 255 :r 255}]
+      [control-button "right-forward" {:l 255}]]
+     [:> rn/View {:style {:flex-direction "row"}}
+      [control-button "turn left"     {:l 0 :r 255}]
+      [:> rn/View {:style {:width 100 :height 100 :margin 5}}]
+      [control-button "trun right"    {:l 255 :r 0}]]
+     [:> rn/View {:style {:flex-direction "row"}}
+      [control-button "back left"     {:r 0}]
+      [control-button "back"          {:l 0 :r 0}]
+      [control-button "back right"    {:l 0}]]]))

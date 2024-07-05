@@ -82,8 +82,7 @@
 
 (defn core []
   (let [interval (r/atom nil)
-        js-set-interval #(js/setInterval v.ble-common/send-speed 50)
-        set-interval #(reset! interval js-set-interval)
+        set-interval #(reset! interval (js/setInterval v.ble-common/send-speed 50))
         clear-interval #(js/clearInterval @interval)]
     (r/create-class
      {:reagent-render

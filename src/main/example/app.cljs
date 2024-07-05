@@ -20,8 +20,8 @@
     :on-press (fn []
                 (.log js/console "todo")
                 #_(dispatch [:set-page :ble-control])
-                (.navigate navigation "DeviceControl")
-                (dispatch [:set-current-device device]))}
+                (dispatch [:set-current-device device])
+                (.navigate navigation "DeviceControl"))}
    [:> rn/Text {:style {:color "#fff"}}
     [:> rn/Text (:name device) " " (:id device)]]])
 
@@ -106,13 +106,13 @@
                                  :initialState (when @!root-state (-> @!root-state .-data .-state))}
      [:> Stack.Navigator
       [:> Stack.Screen {:name "Home"
-                        :component (fn [props] (r/as-element [home props]))
+                        :component (fn [props] (r/as-element [:f> home props]))
                         :options {:title "BLE car con"}}]
       #_[:> Stack.Screen {:name "About"
                           :component (fn [props] (r/as-element [about props]))
                           :options {:title "About"}}]
       [:> Stack.Screen {:name "DeviceControl"
-                        :component (fn [props] (r/as-element [view.control/core props]))}]]]))
+                        :component (fn [props] (r/as-element [:f> view.control/core props]))}]]]))
 
 (defn start
   {:dev/after-load true}

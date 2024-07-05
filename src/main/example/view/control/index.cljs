@@ -1,6 +1,6 @@
 (ns example.view.control.index
-  (:require [clojure.string :as str]
-            [reagent.core :as r]
+  (:require [reagent.core :as r]
+            ["react" :as react]
             ["react-native" :as rn]
             [example.devices.ble :as ble]
             #_[example.views.common :as v.common]
@@ -44,32 +44,36 @@
            :on-press #(reset! control-mode id)}
           [:> rn/Text name]]))]
      (case @control-mode
-       :tile-buttons [v.tile-buttons/core]
-       :toggle-bars [v.toggle-bars/core]
-           ; :magnet [v.mag/mag-panel]
-       [v.single-joystick/core])]))
+       :tile-buttons [:f> v.tile-buttons/core]
+       :toggle-bars [:f> v.toggle-bars/core]
+           ; :magnet [f> v.mag/mag-panel]
+       [:f> v.single-joystick/core])]))
 
 (defn core [props]
   #_(.log js/console props)
   (r/with-let [current-device (subscribe [:get-current-device])
-               connected? (r/atom false)]
-    (r/create-class
-     {:reagent-render
-      (fn []
-        [:> rn/View
-         [:> rn/View {:style {:flex-direction "column" :align-items "flex-start" :margin 10}}
-          [:> rn/Text {:style {:font-size 20 :font-weight "100" :width "100%"}}
-           (:name @current-device)]
-          [:> rn/Text (:id @current-device)]]
-         (if @connected?
-           [control-area]
-           [:> rn/View {:style {:align-content "center" :align-self "center"}}
-            [:> rn/Text "connecting"]])])
-      :UNSAFE-component-will-mount (fn []
-                                     (.log js/console "connect to device")
-                                     (ble/connect (:id @current-device)
-                                                  :on-success (fn []
-                                                                (reset! connected? true))))
-      :UNSAFE-component-will-unmount (fn []
-                                       (.log js/console "disconnect from device")
-                                       (ble/disconnect (:id @current-device)))})))
+               connected? (r/atom false)
+               ;[connected set-connected] (react/useState)
+               ]
+    (react/useEffect
+     (fn []
+       (.log js/console "on enter")
+       (when @current-device
+         (.log js/console "connect to device" @current-device)
+         (ble/connect (:id @current-device)
+                      :on-success #(reset! connected? true) #_(set-connected true)))
+       (fn []
+         (.log js/console "on leave")
+         (when connected?
+           (.log js/console "disconnect from device")
+           (ble/disconnect (:id @current-device)))))
+     #js [])
+    [:> rn/View
+     [:> rn/View {:style {:flex-direction "column" :align-items "flex-start" :margin 10}}
+      [:> rn/Text {:style {:font-size 20 :font-weight "100" :width "100%"}}
+       (:name @current-device)]
+      [:> rn/Text (:id @current-device)]]
+     (if connected?
+       [control-area]
+       [:> rn/View {:style {:align-content "center" :align-self "center"}}
+        [:> rn/Text "connecting"]])]))

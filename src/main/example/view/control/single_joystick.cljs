@@ -28,8 +28,7 @@
 
 (defn core []
   (r/with-let [interval (r/atom nil)
-               js-set-interval #(js/setInterval control.common/send-speed 50)
-               set-interval #(reset! interval js-set-interval)
+               set-interval #(reset! interval (js/setInterval control.common/send-speed 50))
                clear-interval #(js/clearInterval @interval)
                current-device (subscribe [:get-current-device])]
     (println :core @current-device)
