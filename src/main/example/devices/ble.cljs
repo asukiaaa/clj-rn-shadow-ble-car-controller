@@ -24,21 +24,21 @@
   #_(.addListener ble-manager-emitter "BleManagerStopScan" #(js/alert "stopped scanning"))
   (.addListener ble-manager-emitter "BleManagerDiscoverPeripheral" handle-discovered-peripheral))
 
-(defn check-and-request-permission [{:keys [permission on-ok on-reject]}]
-  (-> (.check permissions-android permission)
-      #_(.catch (on-reject "on check"))
-      (.then (fn [result]
-               (println permission result)
-               (if result
-                 (on-ok)
-                 (-> (.request permissions-android permission)
-                     #_(.catch (on-reject "catch for request"))
-                     (.then (fn [result]
-                              (println permission result)
-                              (if result
-                                (on-ok)
-                                (on-reject))
-                              #_(js/alert (str "requested " result))))))))))
+#_(defn check-and-request-permission [{:keys [permission on-ok on-reject]}]
+    (-> (.check permissions-android permission)
+        #_(.catch (on-reject "on check"))
+        (.then (fn [result]
+                 (println permission result)
+                 (if result
+                   (on-ok)
+                   (-> (.request permissions-android permission)
+                       #_(.catch (on-reject "catch for request"))
+                       (.then (fn [result]
+                                (println permission result)
+                                (if result
+                                  (on-ok)
+                                  (on-reject))
+                                #_(js/alert (str "requested " result))))))))))
 
 #_(defn check-and-request-permissions [{:keys [permissions on-ok on-reject]}]
     (for [permission permissions]
@@ -48,45 +48,63 @@
 
 (defn init []
   (when (= (.-OS platform) "android")
-    (if (< (.-Version platform) 23)
-      (start-ble-manager)
-      (let [permission-location (-> permissions-android
-                                    (.-PERMISSIONS)
-                                    (.-ACCESS_COARSE_LOCATION))
-            permission-blueooth-connect (-> permissions-android .-PERMISSIONS .-BLUETOOTH_CONNECT)
-            permission-blueooth-scan (-> permissions-android .-PERMISSIONS .-BLUETOOTH_SCAN)]
-        (println permission-blueooth-connect permission-blueooth-scan)
-        (check-and-request-permission
-         {:permission permission-location
+    (let [is-android12-or-more (> (.-Version platform) 30)
+          permission-coarse-location (-> permissions-android
+                                         .-PERMISSIONS
+                                         .-ACCESS_COARSE_LOCATION)
+          permission-fine-location (-> permissions-android
+                                       .-PERMISSIONS
+                                       .-ACCESS_FINE_LOCATION)
+          permission-blueooth-connect (-> permissions-android .-PERMISSIONS .-BLUETOOTH_CONNECT)
+          permission-blueooth-scan (-> permissions-android .-PERMISSIONS .-BLUETOOTH_SCAN)
+          permissions-to-ask (->> [(when-not is-android12-or-more permission-coarse-location)
+                                   (when-not is-android12-or-more permission-fine-location)
+                                   permission-blueooth-connect permission-blueooth-scan nil]
+                                  (filter #(not (nil? %)))
+                                  #_(into []))]
+      (-> permissions-android
+          (.requestMultiple (clj->js permissions-to-ask))
+          (.then (start-ble-manager)))
+      #_(check-and-request-permission
+         {:permission permission-coarse-location
           :on-reject (fn [error] (.log js/console "rejected" error))
           :on-ok
           (fn []
             (check-and-request-permission
-             {:permission permission-blueooth-connect
+             {:permission permission-fine-location
               :on-reject (fn [error] (.log js/console "rejected" error))
               :on-ok
-              #_(fn [] (.log js/console "ready to run"))
               (fn []
                 (check-and-request-permission
-                 {:permission permission-blueooth-scan
+                 {:permission permission-blueooth-connect
                   :on-reject (fn [error] (.log js/console "rejected" error))
                   :on-ok
                   #_(fn [] (.log js/console "ready to run"))
-                  #(start-ble-manager)}))
-              #_(fn [] (.log js/console "ready to run"))
-              #_(start-ble-manager)}))})
-        #_(-> (.check permissions-android permission-location)
-              (.then (fn [result]
-                       (if result
-                         (start-ble-manager)
-                         (-> (.request permissions-android permission-location)
-                             (.then (fn [result]
-                                      (start-ble-manager)
-                                      #_(js/alert (str "requested " result)))))))))))))
+                  (fn []
+                    (check-and-request-permission
+                     {:permission permission-blueooth-scan
+                      :on-reject (fn [error] (.log js/console "rejected" error))
+                      :on-ok
+                      #_(fn [] (.log js/console "ready to run"))
+                      #(start-ble-manager)}))
+                  #_(fn [] (.log js/console "ready to run"))
+                  #_(start-ble-manager)}))}))})
+      #_(-> (.check permissions-android permission-location)
+            (.then (fn [result]
+                     (if result
+                       (start-ble-manager)
+                       (-> (.request permissions-android permission-location)
+                           (.then (fn [result]
+                                    (start-ble-manager)
+                                    #_(js/alert (str "requested " result))))))))))))
 
 (defn scan []
+  #_(.log js/console rn-ble-manager)
+  (.log js/console "start")
   (-> (.scan rn-ble-manager (clj->js []) 5 true)
-      (.then (fn []
+      (.catch (fn [e] (.log js/console "fialed start")))
+      (.then (fn [e]
+               (.log js/console "started")
                #_(js/alert "scan started")))))
 
 (defn connect [device-id & {:keys [on-success on-error]}]

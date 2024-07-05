@@ -48,12 +48,9 @@
                            ;:justify-content :space-between
                            :align-items :center
                            :background-color :white}}
-       #_[:> rn/TouchableOpacity {:style {:background-color :green :padding 10}
-                                  :on-press (fn []
-                                              (ble/init)
-                                              #_(.alert rn/Alert "call init"))}
-          [:> rn/Text "init"]]
-       [button {:on-press #(ble/scan)}
+       [button {:on-press (fn []
+                            (ble/init)
+                            (ble/scan))}
         "scan"]
        [devices-box {:navigation navigation}]
        #_[:> rn/View {:style {:align-items :center}}
