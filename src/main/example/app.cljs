@@ -3,7 +3,6 @@
             [example.subs]
             [example.widgets :refer [button]]
             [expo.root :as expo-root]
-            ["expo-status-bar" :refer [StatusBar]]
             [re-frame.core :as rf :refer [subscribe dispatch dispatch-sync]]
             ["react-native" :as rn]
             [reagent.core :as r]
@@ -19,69 +18,38 @@
   [:> rn/TouchableHighlight
    {:style {:background-color "#4a4" :border-radius 5 :padding 10 :margin 5}
     :on-press (fn []
-                (.log js/console "todo")
-                #_(dispatch [:set-page :ble-control])
                 (dispatch [:set-current-device device])
                 (.navigate navigation "DeviceControl"))}
    [:> rn/Text {:style {:color "#fff"}}
     [:> rn/Text (:name device) " " (:id device)]]])
 
 (defn devices-box [{:keys [navigation]}]
-  (let [devices (subscribe [:get-devices])]
-    (fn []
-      [:> rn/View
-       (if (empty? @devices)
-         [:> rn/Text {:style {:margin 10}}
-          "no device"]
-         [:> rn/FlatList
-          {:data (clj->js (reverse @devices))
-           :key-extractor (fn [item index]
-                            (:id (js->clj item :keywordize-keys true)))
-           :render-item #(let [device (:item (js->clj % :keywordize-keys true))]
-                           (r/as-element [device-button {:device device :navigation navigation}]))}])])))
+  (r/with-let [devices (subscribe [:get-devices])]
+    [:> rn/View {:style {:flex 1}}
+     (if (empty? @devices)
+       [:> rn/Text {:style {:margin 10}}
+        "no device"]
+       #_[:> rn/ScrollView
+          (for [i (range 20)] [:> rn/Text {:key i} "hi " i])]
+       [:> rn/FlatList
+        {:data (clj->js (reverse @devices))
+         :style {:flat 1}
+         :key-extractor (fn [item _index]
+                          (:id (js->clj item :keywordize-keys true)))
+         :render-item #(let [device (:item (js->clj % :keywordize-keys true))]
+                         (r/as-element [device-button {:device device :navigation navigation}]))}])]))
 
 (defn home [^js props]
-  (r/with-let [counter (rf/subscribe [:get-counter])
-               tap-enabled? (rf/subscribe [:counter-tappable?])]
-    (let [navigation (-> props .-navigation)]
-      [:> rn/View {:style {:background-color :white}}
-       [:> rn/View {:style {:justify-content "space-between"}}
-        [:> rn/Text {:style {:align-self "flex-end"}} "version " (.getVersion device-info)]]
-       [:> rn/View {:style {;:flex 1
-                            :padding-top 20
-                                  ;:justify-content :space-between
-                            :align-items :center}}
-        [button {:on-press (fn []
-                             (ble/init)
-                             (ble/scan))}
-         "scan"]
-        [devices-box {:navigation navigation}]]])))
-
-#_(defn- about
-    []
-    (r/with-let [counter (rf/subscribe [:get-counter])]
-      [:> rn/View {:style {:flex 1
-                           :padding-vertical 50
-                           :padding-horizontal 20
-                           :justify-content :space-between
-                           :align-items :flex-start
-                           :background-color :white}}
-       [:> rn/View {:style {:align-items :flex-start}}
-        [:> rn/Text {:style {:font-weight   :bold
-                             :font-size     54
-                             :color         :blue
-                             :margin-bottom 20}}
-         "About Example App"]
-        [:> rn/Text {:style {:font-weight   :bold
-                             :font-size     20
-                             :color         :blue
-                             :margin-bottom 20}}
-         (str "Counter is at: " @counter)]
-        [:> rn/Text {:style {:font-weight :normal
-                             :font-size   15
-                             :color       :blue}}
-         "Built with React Native, Expo, Reagent, re-frame, and React Navigation"]]
-       [:> StatusBar {:style "auto"}]]))
+  (r/with-let [navigation (-> props .-navigation)]
+    [:> rn/View {:style {:background-color :white :height "100%"}}
+     [:> rn/View {:style {:justify-content "space-between"}}
+      [:> rn/Text {:style {:align-self "flex-end"}} "version " (.getVersion device-info)]]
+     [:> rn/View {:style {:align-items :center}}
+      [button {:on-press (fn []
+                           (ble/init)
+                           (ble/scan))}
+       "scan"]]
+     [:f> devices-box {:navigation navigation}]]))
 
 (defn root []
   ;; The save and restore of the navigation root state is for development time bliss
@@ -98,9 +66,6 @@
       [:> Stack.Screen {:name "Home"
                         :component (fn [props] (r/as-element [:f> home props]))
                         :options {:title "BLE car con"}}]
-      #_[:> Stack.Screen {:name "About"
-                          :component (fn [props] (r/as-element [about props]))
-                          :options {:title "About"}}]
       [:> Stack.Screen {:name "DeviceControl"
                         :component (fn [props] (r/as-element [:f> view.control/core props]))}]]]))
 
