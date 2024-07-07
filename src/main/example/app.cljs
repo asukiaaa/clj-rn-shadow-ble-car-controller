@@ -3,14 +3,14 @@
             [example.subs]
             [example.widgets :refer [button]]
             [expo.root :as expo-root]
-            [re-frame.core :as rf :refer [subscribe dispatch dispatch-sync]]
+            [re-frame.core :as rf :refer [subscribe dispatch]]
             ["react-native" :as rn]
             [reagent.core :as r]
             ["@react-navigation/native" :as rnn]
             ["@react-navigation/native-stack" :as rnn-stack]
             [example.devices.ble :as ble]
             [example.view.control.index :as view.control]
-            ["react-native-device-info" :as device-info]))
+            [example.view.info :as view.info]))
 
 (defonce Stack (rnn-stack/createNativeStackNavigator))
 
@@ -42,9 +42,7 @@
 (defn home [^js props]
   (r/with-let [navigation (-> props .-navigation)]
     [:> rn/View {:style {:background-color :white :height "100%"}}
-     [:> rn/View {:style {:justify-content "space-between"}}
-      [:> rn/Text {:style {:align-self "flex-end"}} "version " (.getVersion device-info)]]
-     [:> rn/View {:style {:align-items :center}}
+     [:> rn/View {:style {:align-items :center} :margin-top 10}
       [button {:on-press (fn []
                            (ble/init)
                            (ble/scan))}
@@ -65,9 +63,14 @@
      [:> Stack.Navigator
       [:> Stack.Screen {:name "Home"
                         :component (fn [props] (r/as-element [:f> home props]))
-                        :options {:title "BLE car con"}}]
+                        :options (fn [props]
+                                   (clj->js
+                                    {:title "BLE car con"
+                                     :headerRight (fn [] (r/as-element [:f> view.info/button-top props]))}))}]
       [:> Stack.Screen {:name "DeviceControl"
-                        :component (fn [props] (r/as-element [:f> view.control/core props]))}]]]))
+                        :component (fn [props] (r/as-element [:f> view.control/core props]))}]
+      [:> Stack.Screen {:name "Info"
+                        :component (fn [props] (r/as-element [:f> view.info/core props]))}]]]))
 
 (defn start
   {:dev/after-load true}
