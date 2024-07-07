@@ -24,8 +24,7 @@
       :name "Magnet"}])
 
 (defn control-area []
-  (r/with-let [control-mode (r/atom (:id (first control-modes)))
-               current-device (subscribe [:get-current-device])]
+  (r/with-let [control-mode (r/atom (:id (first control-modes)))]
     [:> rn/View
      [:> rn/View {:style {:flex-direction "row"
                           :margin-bottom 20
