@@ -3,7 +3,8 @@
             [example.events]
             [example.subs]
             ["react-native" :as ReactNative]
-            ["react-native-ble-manager$default" :as rn-ble-manager]))
+            ["react-native-ble-manager$default" :as rn-ble-manager]
+            ["react-native-geolocation-service$default" :as geo]))
 
 (defonce native-modules (.-NativeModules ReactNative))
 (defonce ble-manager-module (.-rn-ble-manager native-modules))
@@ -49,6 +50,8 @@
 (defn init []
   (when (= (.-OS platform) "android")
     (let [is-android12-or-more (> (.-Version platform) 30)
+          require-location (not is-android12-or-more)
+          require-bluetooth-permission is-android12-or-more
           permission-coarse-location (-> permissions-android
                                          .-PERMISSIONS
                                          .-ACCESS_COARSE_LOCATION)
@@ -57,14 +60,34 @@
                                        .-ACCESS_FINE_LOCATION)
           permission-blueooth-connect (-> permissions-android .-PERMISSIONS .-BLUETOOTH_CONNECT)
           permission-blueooth-scan (-> permissions-android .-PERMISSIONS .-BLUETOOTH_SCAN)
-          permissions-to-ask (->> [(when-not is-android12-or-more permission-coarse-location)
-                                   (when-not is-android12-or-more permission-fine-location)
-                                   permission-blueooth-connect permission-blueooth-scan nil]
-                                  (filter #(not (nil? %)))
-                                  #_(into []))]
+          permissions-to-ask (->> [(when require-location permission-coarse-location)
+                                   (when require-location permission-fine-location)
+                                   (when require-bluetooth-permission permission-blueooth-connect)
+                                   (when require-bluetooth-permission permission-blueooth-scan)]
+                                  (filter #(not (nil? %))))]
       (-> permissions-android
           (.requestMultiple (clj->js permissions-to-ask))
-          (.then (start-ble-manager)))
+          (.then (fn [granted]
+                   (let [permissions-not-granted (filter #(not (nil? %))
+                                                         (for [[key val] (js->clj granted :keywordize-keys)]
+                                                           (when (not (= val "granted")) key)))]
+                     (if (seq permissions-not-granted)
+                       (-> ReactNative .-Alert
+                           (.alert "Permission request"
+                                   (str "Please enable permission of "
+                                        (if require-location "getting location" "device connect"))
+                                   (clj->js [{:text "cancel" :style "cancel"}
+                                             {:text "open config"
+                                              :onPress #(-> ReactNative .-Linking .openSettings)}])))
+                       (if require-location
+                         (.getCurrentPosition geo
+                                              #(start-ble-manager)
+                                              (fn [error]
+                                                #_(println :error error)
+                                                (-> ReactNative .-Alert
+                                                    (.alert "Cannot get location"
+                                                            "Location info is required to connect bluetooth on your android version"))))
+                         (start-ble-manager)))))))
       #_(check-and-request-permission
          {:permission permission-coarse-location
           :on-reject (fn [error] (.log js/console "rejected" error))
