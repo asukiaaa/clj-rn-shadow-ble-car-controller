@@ -8,7 +8,8 @@
             ["@react-navigation/native-stack" :as rnn-stack]
             [example.view.control.index :as view.control]
             [example.view.info :as view.info]
-            [example.view.home :as view.home]))
+            [example.view.home :as view.home]
+            [example.devices.ble :as ble]))
 
 (defonce Stack (rnn-stack/createNativeStackNavigator))
 
@@ -20,6 +21,7 @@
                add-listener! (fn [^js navigation-ref]
                                (when navigation-ref
                                  (.addListener navigation-ref "state" save-root-state!)))]
+    (ble/init)
     [:> rnn/NavigationContainer {:ref add-listener!
                                  :initialState (when @!root-state (-> @!root-state .-data .-state))}
      [:> Stack.Navigator
