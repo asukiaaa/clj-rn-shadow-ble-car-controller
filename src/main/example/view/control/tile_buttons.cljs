@@ -28,10 +28,8 @@
         clear-interval #(js/clearInterval @interval)]
     (react/useEffect
      (fn []
-       (.log js/console "set interval")
        (set-interval)
        (fn []
-         (.log js/console "clear interval")
          (clear-interval)))
      #js [])
     [:> rn/View {:style {:align-content "center" :align-self "center"}}
