@@ -1,5 +1,5 @@
 (ns example.app
-  (:require [example.events]
+  (:require [example.events.core]
             [example.subs]
             [expo.root :as expo-root]
             [re-frame.core :as rf]

@@ -1,8 +1,7 @@
-(ns example.events
+(ns example.events.core
   (:require
-   [re-frame.core :as rf :refer [reg-event-db after]]
+   [re-frame.core :as rf :refer [reg-event-db]]
    [example.db :as db :refer [app-db]]))
-
 
 (rf/reg-event-db
  :initialize-db

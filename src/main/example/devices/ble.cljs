@@ -1,6 +1,6 @@
 (ns example.devices.ble
-  (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-            [example.events]
+  (:require [re-frame.core :refer [dispatch]]
+            [example.events.core]
             [example.subs]
             ["react-native" :as ReactNative]
             ["react-native-ble-manager$default" :as rn-ble-manager]

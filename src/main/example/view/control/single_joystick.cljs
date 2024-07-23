@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             ["react-native" :as rn]
             [example.view.control.common :as control.common]
-            [re-frame.core :refer [dispatch subscribe]]))
+            [example.events.ble :as event-ble]
+            [re-frame.core :refer [dispatch]]))
 
 (defn rate->byte [rate]
   (-> rate
@@ -28,7 +29,8 @@
 
 (defn core []
   (r/with-let [interval (r/atom nil)
-               set-interval #(reset! interval (js/setInterval control.common/send-speed 50))
+               set-interval (fn []
+                              (reset! interval (js/setInterval event-ble/send-speed 50)))
                clear-interval #(js/clearInterval @interval)]
     (r/create-class
      {:reagent-render

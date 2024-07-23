@@ -1,7 +1,7 @@
 (ns example.view.control.tile-buttons
   (:require [reagent.core :as r]
             ["react-native" :as rn]
-            [example.view.control.common :as v.ble-common]
+            [example.events.ble :as event-ble]
             [re-frame.core :refer [dispatch]]
             ["react" :as react]))
 
@@ -11,7 +11,7 @@
 (defn- control-button [label speed]
   (let [set-and-send-speed (fn [speed]
                              (set-speed speed)
-                             (v.ble-common/send-speed))]
+                             (event-ble/send-speed))]
     [:> rn/View
      {:style {:background-color "#494" :width 100 :height 100 :margin 5 :border-radius 5}
       :justify-content "center"
@@ -24,7 +24,7 @@
 
 (defn core []
   (let [interval (r/atom nil)
-        set-interval #(reset! interval (js/setInterval v.ble-common/send-speed 50))
+        set-interval #(reset! interval (js/setInterval event-ble/send-speed 50))
         clear-interval #(js/clearInterval @interval)]
     (react/useEffect
      (fn []
