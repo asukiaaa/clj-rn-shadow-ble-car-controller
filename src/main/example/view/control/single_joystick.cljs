@@ -1,6 +1,5 @@
 (ns example.view.control.single-joystick
   (:require [reagent.core :as r]
-            ["react-native" :as rn]
             [example.view.control.common :as control.common]
             [example.events.ble :as event-ble]
             [re-frame.core :refer [dispatch]]))
