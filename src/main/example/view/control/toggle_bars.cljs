@@ -30,7 +30,7 @@
         on-release (fn []
                      (reset! indexes-rate default-indexes-rate)
                      (on-release default-indexes-rate))
-        action (fn [evt]
+        action (fn [^js evt]
                  (reset! indexes-rate default-indexes-rate)
                  (doall
                   (for [i (range (.-length (.-changedTouches (.-nativeEvent evt))))
@@ -67,7 +67,7 @@
                                   :top (- (* height (get @indexes-rate i)) circle-r)
                                   :left (- (/ width bar-number 2) circle-r)}}]]))])
       :component-did-mount
-      #(reset! ref-obj (-> (.-refs %)
+      #(reset! ref-obj (-> (.-refs ^js %)
                            (aget ref)))})))
 
 (defn set-speed [indexes-rate]

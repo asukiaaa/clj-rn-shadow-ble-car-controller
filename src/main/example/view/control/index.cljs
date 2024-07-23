@@ -73,6 +73,6 @@
        (:name @current-device)]
       [:> rn/Text (:id @current-device)]]
      (if connected?
-       [control-area]
+       [:f> control-area]
        [:> rn/View {:style {:align-content "center" :align-self "center"}}
         [:> rn/Text "connecting"]])]))

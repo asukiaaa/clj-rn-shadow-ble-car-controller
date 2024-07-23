@@ -29,9 +29,7 @@
 (defn core []
   (r/with-let [interval (r/atom nil)
                set-interval #(reset! interval (js/setInterval control.common/send-speed 50))
-               clear-interval #(js/clearInterval @interval)
-               current-device (subscribe [:get-current-device])]
-    (println :core @current-device)
+               clear-interval #(js/clearInterval @interval)]
     (r/create-class
      {:reagent-render
       (fn []

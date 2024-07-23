@@ -1,10 +1,9 @@
 (ns example.view.control.common
   (:require [reagent.core :as r]
             ["react-native" :as rn]
+            ["moment" :as moment]
             [example.devices.ble :as ble]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
-
-(def moment (js/require "moment"))
 
 (def service-id "00ff")
 (def characteristic-id "ff01")
@@ -90,7 +89,7 @@
                      (reset! value-x 0)
                      (reset! value-y 0)
                      (on-release))
-        action (fn [evt]
+        action (fn [^js evt]
                  (-> (rate-x-y (.-pageX (.-nativeEvent evt))
                                (.-pageY (.-nativeEvent evt))
                                @view-x @view-y view-w view-h)
@@ -126,5 +125,5 @@
                               :left (- (+ posi-x-base (* posi-x-base @value-x)) target-r)}}]])
 
       :component-did-mount
-      #(reset! ref-obj (-> (.-refs %)
+      #(reset! ref-obj (-> (.-refs ^js %)
                            (aget ref)))})))
