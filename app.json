@@ -8,7 +8,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -27,12 +27,24 @@
       "bundleIdentifier": "com.asukiaaa.bleCarController"
     },
     "android": {
-      "versionCode": 7,
-      "package": "com.asukiaaa.bleCarController",
-      "compileSdkVersion": 34,
-      "targetSdkVersion": 34,
-      "buildToolsVersion": "34.0.0"
+      "versionCode": 9,
+      "package": "com.asukiaaa.bleCarController"
     },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "13.4"
+          }
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "9c9b217e-2be9-43ce-b788-8511f06f0abf"
